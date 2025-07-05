@@ -1,4 +1,16 @@
-* 
+# Her şeyi ignore et
+*
+
+# frontend klasörünü ve içeriğini dahil et
 !frontend/
 !frontend/**
-!.gitignore
+
+# frontend içindeki istemediğimiz klasör ve dosyaları ignore et
+frontend/node_modules/
+frontend/.next/
+frontend/.turbo/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.DS_Store
