@@ -1,0 +1,14 @@
+{
+  "network": "Flow EVM Testnet",
+  "chainId": 545,
+  "contracts": {
+    "BetHub": "0x2EBd73ae16F66938EaFe55116bb89448b98a57B0",
+    "MockUSDC": "0x3113e40e6514bd3EF2F8D58a519FcE5EF6FbF330"
+  },
+  "deployer": "0xc0506FDb68f4a1CF1EB9a19cCa77e5dD38fAF44f",
+  "deployedAt": "2025-07-06T04:50:00.681Z",
+  "blockNumber": 56407019,
+  "rpcUrl": "https://testnet.evm.nodes.onflow.org",
+  "explorer": "https://testnet.flowscan.org",
+  "faucet": "https://testnet-faucet.onflow.org"
+}

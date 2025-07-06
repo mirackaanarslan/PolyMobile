@@ -1,0 +1,24 @@
+{
+  "name": "flow-contracts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:local": "npx hardhat run scripts/deploy.ts --network hardhat",
+    "deploy:flow": "npx hardhat run scripts/deploy.ts --network flowTestnet",
+    "verify:flow": "npx hardhat verify --network flowTestnet"
+  },
+  "keywords": ["flow", "evm", "prediction", "market", "betting"],
+  "author": "",
+  "license": "MIT",
+  "description": "BetHub prediction market smart contracts for Flow EVM",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.0.0",
+    "hardhat": "^2.25.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "dotenv": "^16.4.7"
+  }
+}

@@ -1,0 +1,179 @@
+project:
+  name: FlowPredictionApp
+  description: >
+    This is a decentralized prediction market built on the Flow EVM network.
+    Users can sign up using email via Privy and place YES/NO bets on real-world events
+    using USDC on Flow. The app features an embedded wallet, a killer swipe-based UX, and an optional AI agent that recommends markets to users based on context.
+
+  tech_stack:
+    blockchain:
+      - flow_evm
+    smart_contract_language:
+      - solidity
+    frontend:
+      framework: react
+      styling: tailwind
+    backend:
+      runtime: nodejs
+      purpose: optional AI agent service
+    wallet:
+      - privy
+    libraries:
+      - ethers.js
+      - privy/react
+      - zustand
+      - wagmi (optional)
+      - hardhat
+
+  objectives:
+    - Deploy a Solidity smart contract called `BetHub` on Flow EVM testnet.
+    - The contract should allow users to place a YES/NO bet with USDC on a given marketId.
+    - Only the contract owner (admin) can resolve the market and mark the winning side.
+    - Users can claim their payout (2x USDC) if their side won and they haven't claimed before.
+    - Frontend must allow users to login via Privy (email login with embedded wallet).
+    - Users should see a carousel or swipe UI with current open markets.
+    - Users should be able to place bets in 1 click with real USDC (Flow testnet).
+    - Optionally: Add a GPT-powered AI agent that recommends which market to bet on.
+
+smart_contract:
+  name: BetHub
+  network: flow_evm_testnet
+  token: USDC
+  solidity_version: ^0.8.24
+  functions:
+    - name: placeBet
+      args:
+        - marketId: uint256
+        - side: bool
+        - amount: uint256
+      visibility: external
+      payable: false
+      description: >
+        Transfers USDC from msg.sender to contract, records the user's bet on a market.
+
+    - name: resolveMarket
+      args:
+        - marketId: uint256
+        - winningSide: bool
+      onlyOwner: true
+      description: >
+        Resolves a given marketId and sets the winning outcome.
+
+    - name: claim
+      args:
+        - marketId: uint256
+      visibility: external
+      description: >
+        Allows winning users to claim their 2x payout if their side won.
+
+frontend:
+  features:
+    - auth:
+        type: privy
+        onboarding:
+          - email_login: true
+          - embedded_wallet: true
+          - auto_connect: true
+
+    - wallet_connection:
+        provider: privy + ethers.js
+        chain: flow_evm
+        rpc_url: https://testnet.evm.nodes.onflow.org
+        chain_id: 747
+
+    - market_view:
+        type: swipe_card
+        data_source: static json or mock market list
+        fields:
+          - marketId
+          - question
+          - expiresAt
+          - currentYESPrice
+          - currentNOPrice
+
+    - betting_flow:
+        action: callContract
+        contract: BetHub
+        function: placeBet
+        parameters:
+          - marketId (from card)
+          - side (yes selected via UI)
+          - amount: fixed 1 USDC
+        precondition:
+          - connected wallet
+          - sufficient USDC balance
+
+    - claim_flow:
+        show_button_if:
+          - market resolved
+          - user won
+          - not claimed
+        action: call BetHub.claim(marketId)
+
+    - optional_ai:
+        service: openai
+        function: recommendMarketForUser(userProfile)
+        usage:
+          - When user is idle for 10s, recommend a market
+          - Display as a "🤖 Eliza Suggests" card at top
+
+deployment:
+  contract:
+    tool: hardhat
+    network: flow-evm-testnet
+    environment_variables:
+      - PRIVATE_KEY
+      - USDC_ADDRESS (Flow testnet)
+    verify: false
+  frontend:
+    deploy_to: vercel or netlify
+    env:
+      - PRIVY_APP_ID
+      - PRIVY_API_KEY
+      - FLOW_CHAIN_ID: 747
+      - FLOW_RPC_URL: https://testnet.evm.nodes.onflow.org
+  faucet:
+    - flow testnet faucet
+    - USDC mock mint for test users
+
+ai_agent:
+  enabled: true
+  model: gpt-4
+  behavior:
+    - context_aware: true
+    - not_financial_advice: true
+    - tone: helpful, neutral
+    - prompt_template: |
+        User is browsing prediction markets. Recommend one market from the following list that is timely and potentially interesting.
+        Markets: {marketList}
+        User history: {userData}
+        Your suggestion should be short and confident.
+  endpoint: /api/ai/recommend
+
+timeline:
+  day1:
+    - Initialize project repo
+    - Set up Hardhat + BetHub.sol contract
+    - Deploy to Flow EVM testnet
+  day2:
+    - Scaffold frontend (React + Privy auth)
+    - Integrate ethers.js, test Flow wallet
+    - Implement `placeBet()` call
+  day3:
+    - Build market swipe UI
+    - Add mock market list
+    - Implement bet storage + confirmation toast
+    - Deploy frontend
+  day4:
+    - Add resolve/claim support for admin
+    - AI market suggest feature (optional)
+    - Styling polish
+    - Test with users
+
+notes:
+  - Prioritize Flow EVM integration with Privy
+  - Keep UX extremely smooth: no token approval steps, minimize wallet popups
+  - Hardhat test cases: test full bet → resolve → claim cycle
+  - Avoid Polymarket contract integration in first version (focus only on Flow)
+  - Focus: killer UX + reliable bet system on Flow
+
